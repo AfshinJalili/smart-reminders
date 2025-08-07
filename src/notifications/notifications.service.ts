@@ -197,7 +197,6 @@ export class NotificationsService implements NotificationService, OnModuleInit {
       throw new Error(`Provider not found: ${providerId}`);
     }
 
-    // Create a test payload if none provided
     const payload = testPayload || {
       id: `test-${Date.now()}`,
       recipients: ['test@example.com'],

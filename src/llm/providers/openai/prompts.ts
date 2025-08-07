@@ -20,7 +20,7 @@ If the user input is too vague or lacks enough information (such as a missing ti
 
 Examples of vague inputs: "Remind me", "Help", "To do something later", etc.
 
-In these cases, set 'title' and 'dateTime' to 'null', and provide a short reason in 'error'.`;
+In these cases, set 'title' and 'dateTime' to 'null', and provide a short reason in 'error'. otherwise, set 'error' to 'null'.`;
 
 /**
  * Constructs the system prompt with the current date and user timezone.

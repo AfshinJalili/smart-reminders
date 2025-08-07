@@ -84,10 +84,6 @@ export class OpenAiService implements LlmProvider {
 
           return parsedResponse;
         } catch (parseError) {
-          this.logger.error(
-            'Error parsing function call arguments:',
-            parseError,
-          );
           throw new InvalidResponseError(
             'Invalid function call arguments format',
             parseError instanceof Error

@@ -25,7 +25,7 @@ export const reminderGenerationFunction: FunctionTool = {
         nullable: true,
       },
     },
-    required: [],
+    required: ['title', 'dateTime', 'error'],
     additionalProperties: false,
   },
 };
