@@ -46,6 +46,12 @@ export class ConfigService {
   }
 
   get openaiTemperature(): number {
-    return this.configService.get<number>('OPENAI_TEMPERATURE', 0.5);
+    const temperature = this.configService.get<string | number>(
+      'OPENAI_TEMPERATURE',
+      0.5,
+    );
+    return typeof temperature === 'string'
+      ? parseFloat(temperature)
+      : temperature;
   }
 }
