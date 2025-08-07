@@ -12,6 +12,12 @@ This is a **work-in-progress** application with the following current features:
 - **Validation**: Input validation using class-validator
 - **Error Handling**: Custom exception filters for LLM-related errors
 
+## Prompt Design
+
+I used **Response API** because it was a one-time ask - no conversation needed, just extract the reminder details.
+
+I used **function calling** for structured output - ensures the LLM returns data in the exact format I need.
+
 ## Prerequisites
 
 - Node.js (v18 or higher)
