@@ -13,11 +13,6 @@ export class LlmService {
   ) {}
 
   async generateReminder(input: CreateReminderDto): Promise<ReminderDetails> {
-    try {
-      return this.llmProvider.generateReminder(input);
-    } catch (error) {
-      this.logger.error('Error generating reminder:', error);
-      throw error;
-    }
+    return this.llmProvider.generateReminder(input);
   }
 }

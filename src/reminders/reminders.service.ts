@@ -14,26 +14,20 @@ export class RemindersService {
   ) {}
 
   async create(createReminderDto: CreateReminderDto) {
-    try {
-      const reminder =
-        await this.llmService.generateReminder(createReminderDto);
+    const reminder = await this.llmService.generateReminder(createReminderDto);
 
-      const reminderDateTime = this.parseReminderDateTime(reminder.dateTime);
+    const reminderDateTime = this.parseReminderDateTime(reminder.dateTime);
 
-      const notificationId = await this.scheduleReminderNotification(
-        reminder,
-        reminderDateTime,
-      );
+    const notificationId = await this.scheduleReminderNotification(
+      reminder,
+      reminderDateTime,
+    );
 
-      return {
-        ...reminder,
-        notificationId,
-        scheduledFor: reminderDateTime.toISOString(),
-      };
-    } catch (error) {
-      this.logger.error('Error creating reminder:', error);
-      throw error;
-    }
+    return {
+      ...reminder,
+      notificationId,
+      scheduledFor: reminderDateTime.toISOString(),
+    };
   }
 
   /**
