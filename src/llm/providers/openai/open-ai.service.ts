@@ -10,12 +10,7 @@ import {
   ReminderGenerationError,
 } from './errors';
 import { withRetry, DEFAULT_RETRY_CONFIG } from '../../retry.util';
-
-const SYSTEM_PROMPT_TEMPLATE = `You are a task extractor. Always call the extract_task_details function to extract task details from the user message.
-You must use the current date and time to extract the date and time of the task.
-don't include 'set an alarm' or 'remind me' etc, in the title.
-currentDate in UTC is {currentDate},
-user timezone is {userTimezone}`;
+import { constructSystemPrompt } from './prompts';
 
 const TOOL_CHOICE_CONFIG = {
   type: 'function' as const,
@@ -49,10 +44,7 @@ export class OpenAiService implements LlmProvider {
 
   async generateReminder(input: CreateReminderDto): Promise<ReminderDetails> {
     const currentDate = new Date().toISOString();
-    const systemPrompt = SYSTEM_PROMPT_TEMPLATE.replace(
-      '{currentDate}',
-      currentDate,
-    ).replace('{userTimezone}', input.userTimezone);
+    const systemPrompt = constructSystemPrompt(currentDate, input.userTimezone);
 
     const apiCallOperation = async () => {
       const response = await this.openai.responses.create({

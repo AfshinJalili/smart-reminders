@@ -4,21 +4,28 @@ export const reminderGenerationFunction: FunctionTool = {
   strict: true,
   type: 'function',
   name: 'extract_task_details',
-  description: `Extracts task details from a natural language message. dateTime must be in ISO 8601 format.`,
+  description: `Extracts a task and UTC datetime from natural language prompts in English or Persian.`,
   parameters: {
     type: 'object',
     properties: {
       title: {
         type: 'string',
-        description: 'The title of the task',
+        description: 'The main task (no "remind me" or "set an alarm" etc).',
+        nullable: true,
       },
       dateTime: {
         type: 'string',
+        description: 'Datetime in ISO 8601 UTC format. Based on user timezone.',
+        nullable: true,
+      },
+      error: {
+        type: 'string',
         description:
-          'The date and time of the task in ISO 8601 format. UTC timezone',
+          'A brief error message when the input is vague, incomplete, or unprocessable.',
+        nullable: true,
       },
     },
-    required: ['title', 'dateTime'],
+    required: [],
     additionalProperties: false,
   },
 };
