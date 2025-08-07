@@ -9,6 +9,7 @@ import {
   InvalidResponseError,
   ReminderGenerationError,
 } from './errors';
+import { withRetry, DEFAULT_RETRY_CONFIG } from '../../retry.util';
 
 const SYSTEM_PROMPT_TEMPLATE = `You are a task extractor. Always call the extract_task_details function to extract task details from the user message.
 You must use the current date and time to extract the date and time of the task.
@@ -53,8 +54,8 @@ export class OpenAiService implements LlmProvider {
       currentDate,
     ).replace('{userTimezone}', input.userTimezone);
 
-    const response = await this.openai.responses
-      .create({
+    const apiCallOperation = async () => {
+      const response = await this.openai.responses.create({
         model: this.configService.openaiModel,
         temperature: this.configService.openaiTemperature,
         input: [
@@ -66,33 +67,46 @@ export class OpenAiService implements LlmProvider {
         ],
         tools: [reminderGenerationFunction],
         tool_choice: TOOL_CHOICE_CONFIG,
-      })
-      .catch((error) => {
-        this.logger.error('Error calling OpenAI API:', error);
-        throw new ReminderGenerationError(
-          'Failed to generate reminder from OpenAI',
-          error,
-        );
       });
 
-    if (!response.output?.[0]) {
-      throw new InvalidResponseError('Empty response from OpenAI');
-    }
-
-    if (response.output[0].type === 'function_call') {
-      try {
-        return JSON.parse(response.output[0].arguments) as ReminderDetails;
-      } catch (parseError) {
-        this.logger.error('Error parsing function call arguments:', parseError);
-        throw new InvalidResponseError(
-          'Invalid function call arguments format',
-          parseError instanceof Error
-            ? parseError
-            : new Error(String(parseError)),
-        );
+      if (!response.output?.[0]) {
+        throw new InvalidResponseError('Empty response from OpenAI');
       }
-    }
 
-    throw new NoFunctionCallError();
+      if (response.output[0].type === 'function_call') {
+        try {
+          return JSON.parse(response.output[0].arguments) as ReminderDetails;
+        } catch (parseError) {
+          this.logger.error(
+            'Error parsing function call arguments:',
+            parseError,
+          );
+          throw new InvalidResponseError(
+            'Invalid function call arguments format',
+            parseError instanceof Error
+              ? parseError
+              : new Error(String(parseError)),
+          );
+        }
+      }
+
+      throw new NoFunctionCallError();
+    };
+    try {
+      return await withRetry(
+        apiCallOperation,
+        DEFAULT_RETRY_CONFIG,
+        this.logger,
+      );
+    } catch (error) {
+      this.logger.error(
+        'All retry attempts failed for OpenAI API call:',
+        error,
+      );
+      throw new ReminderGenerationError(
+        'Failed to generate reminder from OpenAI after retries',
+        error instanceof Error ? error : new Error(String(error)),
+      );
+    }
   }
 }
