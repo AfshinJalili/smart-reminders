@@ -8,6 +8,8 @@ import {
   NoFunctionCallError,
   InvalidResponseError,
   ReminderGenerationError,
+  VagueInputError,
+  MissingRequiredFieldsError,
 } from './errors';
 import { withRetry, DEFAULT_RETRY_CONFIG } from '../../retry.util';
 import { constructSystemPrompt } from './prompts';
@@ -67,7 +69,21 @@ export class OpenAiService implements LlmProvider {
 
       if (response.output[0].type === 'function_call') {
         try {
-          return JSON.parse(response.output[0].arguments) as ReminderDetails;
+          const parsedResponse = JSON.parse(
+            response.output[0].arguments,
+          ) as ReminderDetails & { error?: string };
+
+          if (parsedResponse.error) {
+            throw new VagueInputError(parsedResponse.error);
+          }
+
+          if (!parsedResponse.title || !parsedResponse.dateTime) {
+            throw new MissingRequiredFieldsError(
+              'Missing required fields: title or dateTime',
+            );
+          }
+
+          return parsedResponse;
         } catch (parseError) {
           this.logger.error(
             'Error parsing function call arguments:',

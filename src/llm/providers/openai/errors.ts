@@ -34,3 +34,17 @@ export class InvalidResponseError extends ReminderGenerationError {
     this.name = 'InvalidResponseError';
   }
 }
+
+export class VagueInputError extends ReminderGenerationError {
+  constructor(public readonly errorMessage: string) {
+    super(`Vague or incomplete input: ${errorMessage}`);
+    this.name = 'VagueInputError';
+  }
+}
+
+export class MissingRequiredFieldsError extends ReminderGenerationError {
+  constructor(public readonly errorMessage: string) {
+    super(`Missing required fields: ${errorMessage}`);
+    this.name = 'MissingRequiredFieldsError';
+  }
+}
