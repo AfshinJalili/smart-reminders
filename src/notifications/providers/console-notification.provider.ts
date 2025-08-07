@@ -29,7 +29,6 @@ export class ConsoleNotificationProvider implements NotificationProvider {
     );
     this.logger.log('==========================');
 
-    // Simulate some processing time
     await new Promise((resolve) => setTimeout(resolve, 100));
 
     return {
@@ -47,12 +46,12 @@ export class ConsoleNotificationProvider implements NotificationProvider {
   }
 
   async isAvailable(): Promise<boolean> {
-    // Console provider is always available
+    // Mock
     return Promise.resolve(true);
   }
 
   async validatePayload(payload: NotificationPayload): Promise<boolean> {
-    // Basic validation for console provider
+    // Mock
     return Promise.resolve(
       !!(
         payload.id &&

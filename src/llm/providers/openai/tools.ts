@@ -1,5 +1,8 @@
 import { FunctionTool } from 'openai/resources/responses/responses';
 
+/**
+ * Function tool for extracting task details from natural language prompts
+ */
 export const reminderGenerationFunction: FunctionTool = {
   strict: true,
   type: 'function',

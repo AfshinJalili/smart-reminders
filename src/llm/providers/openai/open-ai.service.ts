@@ -43,6 +43,15 @@ export class OpenAiService implements LlmProvider {
     return this.openai;
   }
 
+  /**
+   * Generate a reminder using the OpenAI API
+   * @param input The input data containing the user prompt and timezone
+   * @returns Promise that resolves to the generated reminder details
+   * @throws {NoFunctionCallError} If the response does not contain a function call
+   * @throws {InvalidResponseError} If the response is invalid
+   * @throws {VagueInputError} If the input is vague
+   * @throws {MissingRequiredFieldsError} If the required fields are missing
+   */
   async generateReminder(input: CreateReminderDto): Promise<ReminderDetails> {
     const currentDate = new Date().toISOString();
     const systemPrompt = constructSystemPrompt(currentDate, input.userTimezone);

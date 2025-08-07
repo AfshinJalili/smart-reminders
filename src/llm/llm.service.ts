@@ -12,6 +12,11 @@ export class LlmService {
     private readonly llmProvider: LlmProvider,
   ) {}
 
+  /**
+   * Generate a reminder using the LLM provider
+   * @param input The input data containing the user prompt and timezone
+   * @returns Promise that resolves to the generated reminder details
+   */
   async generateReminder(input: CreateReminderDto): Promise<ReminderDetails> {
     return this.llmProvider.generateReminder(input);
   }
