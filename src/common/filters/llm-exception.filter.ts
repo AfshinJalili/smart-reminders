@@ -92,7 +92,6 @@ export class LlmExceptionFilter implements ExceptionFilter {
       });
     }
 
-    // Handle other errors (fallback)
     this.logger.error('Unhandled exception', exception);
     return response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,

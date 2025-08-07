@@ -7,7 +7,6 @@ import { ConfigService } from 'src/config/config.service';
 import {
   NoFunctionCallError,
   InvalidResponseError,
-  ReminderGenerationError,
   VagueInputError,
   MissingRequiredFieldsError,
 } from './errors';
@@ -100,21 +99,7 @@ export class OpenAiService implements LlmProvider {
 
       throw new NoFunctionCallError();
     };
-    try {
-      return await withRetry(
-        apiCallOperation,
-        DEFAULT_RETRY_CONFIG,
-        this.logger,
-      );
-    } catch (error) {
-      this.logger.error(
-        'All retry attempts failed for OpenAI API call:',
-        error,
-      );
-      throw new ReminderGenerationError(
-        'Failed to generate reminder from OpenAI after retries',
-        error instanceof Error ? error : new Error(String(error)),
-      );
-    }
+
+    return await withRetry(apiCallOperation, DEFAULT_RETRY_CONFIG, this.logger);
   }
 }
