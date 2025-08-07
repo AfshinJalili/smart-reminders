@@ -3,25 +3,20 @@ import OpenAI from 'openai';
 import { LlmProvider, ReminderDetails } from '../../interfaces';
 import { reminderGenerationFunction } from './tools';
 import { CreateReminderDto } from 'src/reminders/dto/create-reminder.dto';
+import { ConfigService } from 'src/config/config.service';
 
 @Injectable()
 export class OpenAiService implements LlmProvider {
   private readonly logger = new Logger(OpenAiService.name);
   private readonly openai: OpenAI;
 
-  constructor() {
-    const apiKey =
-      process.env.OPENAI_API_KEY ||
-      'aa-fr5t1creBl11thRy5b1SkBy4aD3TlxQa54cTxKlmviSCy8Cs';
-
-    if (!apiKey) {
-      this.logger.error('OPENAI_API_KEY environment variable is not set');
-      throw new Error('OPENAI_API_KEY environment variable is required');
-    }
+  constructor(private readonly configService: ConfigService) {
+    const apiKey = this.configService.openaiApiKey;
+    const baseURL = this.configService.openaiBaseUrl;
 
     this.openai = new OpenAI({
       apiKey,
-      baseURL: 'https://api.avalai.ir/v1',
+      baseURL,
       dangerouslyAllowBrowser: false,
     });
 
@@ -38,8 +33,8 @@ export class OpenAiService implements LlmProvider {
   async generateReminder(input: CreateReminderDto): Promise<ReminderDetails> {
     try {
       const response = await this.openai.responses.create({
-        model: 'gpt-4o-mini',
-        temperature: 0.5,
+        model: this.configService.openaiModel,
+        temperature: this.configService.openaiTemperature,
         input: [
           {
             role: 'system',
