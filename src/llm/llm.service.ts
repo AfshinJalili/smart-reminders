@@ -1,26 +1,23 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { OpenAiService } from './open-ai.service';
+import { Injectable, Logger, Inject } from '@nestjs/common';
+import { LlmProvider, ReminderDetails } from './interfaces';
+import { CreateReminderDto } from 'src/reminders/dto/create-reminder.dto';
+import { LLM_PROVIDER_TOKEN } from './constants';
 
 @Injectable()
 export class LlmService {
   private readonly logger = new Logger(LlmService.name);
 
-  constructor(private readonly openAiService: OpenAiService) {}
+  constructor(
+    @Inject(LLM_PROVIDER_TOKEN)
+    private readonly llmProvider: LlmProvider,
+  ) {}
 
-  async generateReminder(input: {
-    userPrompt: string;
-    userTimezone: string;
-  }): Promise<{ description: string; dateTime: Date }> {
+  async generateReminder(input: CreateReminderDto): Promise<ReminderDetails> {
     try {
-      const taskDetails = await this.openAiService.extractTaskDetails(input);
-      console.log(taskDetails);
-      return {
-        description: taskDetails.title,
-        dateTime: new Date(taskDetails.dateTime),
-      };
+      return this.llmProvider.generateReminder(input);
     } catch (error) {
       this.logger.error('Error generating reminder:', error);
-      return { description: 'Error creating reminder', dateTime: new Date() };
+      throw error;
     }
   }
 }

@@ -1,38 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
 import OpenAI from 'openai';
-import { Tool } from 'openai/resources/responses/responses';
+import { LlmProvider, ReminderDetails } from '../../interfaces';
+import { reminderGenerationFunction } from './tools';
+import { CreateReminderDto } from 'src/reminders/dto/create-reminder.dto';
 
 @Injectable()
-export class OpenAiService {
+export class OpenAiService implements LlmProvider {
   private readonly logger = new Logger(OpenAiService.name);
   private readonly openai: OpenAI;
-  /**
-   * Extract task details from natural language using function calling
-   */
-  private functions: Tool[] = [
-    {
-      strict: true,
-      type: 'function',
-      name: 'extract_task_details',
-      description: `Extracts task details from a natural language message. dateTime must be in ISO 8601 format.`,
-      parameters: {
-        type: 'object',
-        properties: {
-          title: {
-            type: 'string',
-            description: 'The title of the task',
-          },
-          dateTime: {
-            type: 'string',
-            description:
-              'The date and time of the task in ISO 8601 format. UTC timezone',
-          },
-        },
-        required: ['title', 'dateTime'],
-        additionalProperties: false,
-      },
-    },
-  ];
 
   constructor() {
     const apiKey =
@@ -60,13 +35,7 @@ export class OpenAiService {
     return this.openai;
   }
 
-  async extractTaskDetails(input: {
-    userPrompt: string;
-    userTimezone: string;
-  }): Promise<{
-    title: string;
-    dateTime: string;
-  }> {
+  async generateReminder(input: CreateReminderDto): Promise<ReminderDetails> {
     try {
       const response = await this.openai.responses.create({
         model: 'gpt-4o-mini',
@@ -82,20 +51,15 @@ export class OpenAiService {
           },
           { role: 'user', content: input.userPrompt },
         ],
-        tools: this.functions,
+        tools: [reminderGenerationFunction],
         tool_choice: {
           type: 'function',
-          name: 'extract-task-details',
+          name: reminderGenerationFunction.name,
         },
       });
 
       if (response.output[0].type === 'function_call') {
-        console.log(new Date().toISOString());
-        console.log(response.output[0]);
-        return JSON.parse(response.output[0].arguments) as {
-          title: string;
-          dateTime: string;
-        };
+        return JSON.parse(response.output[0].arguments) as ReminderDetails;
       }
       throw new Error('No function call returned from OpenAI');
     } catch (error) {
