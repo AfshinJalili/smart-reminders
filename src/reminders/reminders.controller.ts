@@ -7,7 +7,7 @@ export class RemindersController {
   constructor(private readonly remindersService: RemindersService) {}
 
   @Post()
-  create(@Body() createReminderDto: CreateReminderDto) {
-    return this.remindersService.create(createReminderDto);
+  async create(@Body() createReminderDto: CreateReminderDto) {
+    return await this.remindersService.create(createReminderDto);
   }
 }
